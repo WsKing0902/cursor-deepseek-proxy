@@ -33,6 +33,10 @@ AGENT_MODES = (
     "plan-execution",
 )
 
+# Cursor 下拉中同时注册；默认模型由 .env 的 DEEPSEEK_MODEL 决定
+SUPPORTED_MODELS = ("deepseek-v4-pro", "deepseek-v4-flash")
+DEFAULT_MODEL = "deepseek-v4-pro"
+
 
 def load_env(path: Path) -> dict[str, str]:
     env: dict[str, str] = {}
@@ -76,21 +80,26 @@ def set_default_model(ai_settings: dict, model_id: str) -> None:
     ai_settings["backgroundComposerModel"] = model_id
 
 
+def register_models(ai_settings: dict, model_ids: tuple[str, ...]) -> None:
+    user_models = list(ai_settings.get("userAddedModels") or [])
+    for mid in model_ids:
+        if mid not in user_models:
+            user_models.append(mid)
+    ai_settings["userAddedModels"] = user_models
+
+    enabled = list(ai_settings.get("modelOverrideEnabled") or [])
+    for mid in model_ids:
+        if mid not in enabled:
+            enabled.append(mid)
+    ai_settings["modelOverrideEnabled"] = enabled
+
+
 def patch_application_user(data: dict, base_url: str, model_id: str) -> dict:
     data["openAIBaseUrl"] = base_url.rstrip("/")
     data["useOpenAIKey"] = True
 
     ai_settings = data.setdefault("aiSettings", {})
-    user_models = list(ai_settings.get("userAddedModels") or [])
-    if model_id not in user_models:
-        user_models.append(model_id)
-    ai_settings["userAddedModels"] = user_models
-
-    enabled = list(ai_settings.get("modelOverrideEnabled") or [])
-    if model_id not in enabled:
-        enabled.append(model_id)
-    ai_settings["modelOverrideEnabled"] = enabled
-
+    register_models(ai_settings, SUPPORTED_MODELS)
     set_default_model(ai_settings, model_id)
     return data
 
@@ -104,7 +113,14 @@ def main() -> int:
     env_file = Path(args.env) if args.env else ENV_FILE
     env = load_env(env_file)
     api_key = env.get("DEEPSEEK_API_KEY", "")
-    model_id = env.get("DEEPSEEK_MODEL", "deepseek-v4-pro")
+    model_id = env.get("DEEPSEEK_MODEL", DEFAULT_MODEL).strip()
+    if model_id not in SUPPORTED_MODELS:
+        print(
+            f"警告：DEEPSEEK_MODEL={model_id!r} 不在支持列表 {list(SUPPORTED_MODELS)}，"
+            f"将使用 {DEFAULT_MODEL}。",
+            file=sys.stderr,
+        )
+        model_id = DEFAULT_MODEL
     cursor_base = env.get("CURSOR_BASE_URL", "").strip().rstrip("/")
     direct_base = env.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com").strip().rstrip("/")
 
@@ -176,7 +192,9 @@ def main() -> int:
     print(f"  Model    : {model_id}")
     print(f"  API Key  : {api_key[:8]}...{api_key[-4:]}")
     print()
-    print("请重新打开 Cursor → 聊天窗口左上角选择", model_id)
+    others = [m for m in SUPPORTED_MODELS if m != model_id]
+    print(f"请重新打开 Cursor → 默认模型: {model_id}")
+    print(f"  也可在聊天窗口切换: {model_id} / {', '.join(others)}")
     return 0
 
 

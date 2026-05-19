@@ -92,10 +92,20 @@ export no_proxy="$NO_PROXY"
 |------|------|------|
 | `DEEPSEEK_API_KEY` | ✅ | DeepSeek API Key |
 | `DEEPSEEK_BASE_URL` | | 默认 `https://api.deepseek.com` |
-| `DEEPSEEK_MODEL` | | 默认 `deepseek-v4-pro` |
+| `DEEPSEEK_MODEL` | | 默认 `deepseek-v4-pro`；可选 `deepseek-v4-flash` |
 | `CURSOR_BASE_URL` | | 由部署脚本自动写入隧道地址 |
 
-### 4.2 代理思考模式 `config/proxy-config.yaml`
+### 4.2 模型切换（Pro / Flash）
+
+| 方式 | 命令 |
+|------|------|
+| 改默认并写入 Cursor | `bash switch-model.sh deepseek-v4-flash`（先 Cmd+Q） |
+| 仅 Cursor 临时切换 | 聊天窗口模型下拉，无需改 `.env` |
+| 日常启动 | `bash redeploy.sh` → 下拉选 pro 或 flash |
+
+`apply_config.py` 会同时注册 `deepseek-v4-pro` 与 `deepseek-v4-flash`。
+
+### 4.3 代理思考模式 `config/proxy-config.yaml`
 
 控制 DeepSeek V4 在思考模式下的推理深度，对应字段 **`reasoning_effort`**。
 

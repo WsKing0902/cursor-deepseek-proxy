@@ -62,7 +62,16 @@ DEEPSEEK_API_KEY=sk-your-real-key
 
 Leave `CURSOR_BASE_URL` empty—scripts fill it automatically.
 
-### 5.1 Thinking effort (optional)
+### 5.1 Model selection (Pro / Flash)
+
+| Model | Notes |
+|-------|-------|
+| `deepseek-v4-pro` | Default, complex Agent tasks |
+| `deepseek-v4-flash` | Faster, lower cost |
+
+Switch default: `bash switch-model.sh deepseek-v4-flash` (Cmd+Q Cursor first).
+
+### 5.2 Thinking effort (optional)
 
 Default **`reasoning_effort: high`** (not `max`—`max` is slower in Agent multi-turn).
 

@@ -40,6 +40,7 @@ Cursor also blocks Base URL pointing to `127.0.0.1` (SSRF protection), so a loca
 | **Auto URL sync** | `url-sync` service + host bridge updates Cursor when the tunnel changes |
 | **Ready to use** | `bash deploy.sh` / `bash redeploy.sh` deploy and open Cursor |
 | **Thinking effort** | Default `reasoning_effort: high` (see [Adjust thinking mode](#adjust-thinking-mode-reasoning_effort)) |
+| **Models** | **`deepseek-v4-pro`** and **`deepseek-v4-flash`** (see [Model selection](#model-selection-pro--flash)) |
 
 ---
 
@@ -67,7 +68,7 @@ cp config/env.example .env
 bash deploy.sh
 ```
 
-Then select model **`deepseek-v4-pro`** and switch to **Agent** mode in Cursor.
+Then select **`deepseek-v4-pro`** or **`deepseek-v4-flash`** and switch to **Agent** mode in Cursor.
 
 > **Using Clash / Surge?** Set Cloudflare-related domains to **DIRECT**, or the tunnel will fail. See [Operations · Proxy rules](docs/en/OPERATIONS.md#3-proxy--firewall-rules-important).
 
@@ -124,6 +125,36 @@ flowchart TB
 | `bash docker/bin/down.sh` | Stop all services |
 | `bash docker/bin/logs.sh` | Container logs |
 | `python3 src/sync_cursor.py --launch` | Manual URL sync and open Cursor |
+| `bash switch-model.sh deepseek-v4-flash` | Change default model and write Cursor |
+
+---
+
+## Model selection (Pro / Flash)
+
+| Model | Best for |
+|-------|----------|
+| **`deepseek-v4-pro`** | Complex reasoning, large refactors, multi-step Agent (default) |
+| **`deepseek-v4-flash`** | Daily coding, quick Q&A, lower cost, faster |
+
+Both appear in Cursor’s model dropdown after deploy. The proxy forwards whatever `model` Cursor sends.
+
+### Local workflow
+
+**Start / daily use**
+
+```bash
+bash redeploy.sh
+# Pick pro or flash in Cursor → Agent mode
+```
+
+**Change default model only**
+
+```bash
+bash switch-model.sh deepseek-v4-flash   # Cmd+Q Cursor first
+# Or edit .env DEEPSEEK_MODEL=... then python3 src/apply_config.py
+```
+
+**Temporary switch in Cursor** — use the model dropdown; no `.env` change needed.
 
 ---
 

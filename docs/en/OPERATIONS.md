@@ -80,10 +80,20 @@ export no_proxy="$NO_PROXY"
 |----------|----------|-------------|
 | `DEEPSEEK_API_KEY` | ✅ | DeepSeek API key |
 | `DEEPSEEK_BASE_URL` | | Default `https://api.deepseek.com` |
-| `DEEPSEEK_MODEL` | | Default `deepseek-v4-pro` |
+| `DEEPSEEK_MODEL` | | Default `deepseek-v4-pro`; or `deepseek-v4-flash` |
 | `CURSOR_BASE_URL` | | Auto-filled tunnel URL |
 
-### 4.2 Thinking mode `config/proxy-config.yaml`
+### 4.2 Model switch (Pro / Flash)
+
+| Method | Command |
+|--------|---------|
+| Change default + Cursor DB | `bash switch-model.sh deepseek-v4-flash` (Cmd+Q first) |
+| Temporary in Cursor | Model dropdown only |
+| Daily start | `bash redeploy.sh` |
+
+Both models are registered by `apply_config.py`.
+
+### 4.3 Thinking mode `config/proxy-config.yaml`
 
 Field: **`reasoning_effort`**
 

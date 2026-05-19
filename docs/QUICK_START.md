@@ -123,7 +123,18 @@ DEEPSEEK_API_KEY=sk-your-key-here
 
 其他配置项不用改，`CURSOR_BASE_URL` 留空即可——脚本会自动填写。
 
-### 5.1 调整思考强度（可选）
+### 5.1 选择模型（Pro / Flash）
+
+`.env` 中 `DEEPSEEK_MODEL` 决定**默认**模型；部署后下拉中 **两个都能选**：
+
+| 模型 | 说明 |
+|------|------|
+| `deepseek-v4-pro` | 默认，复杂 Agent 任务 |
+| `deepseek-v4-flash` | 更快、更省 token |
+
+切换默认模型：`bash switch-model.sh deepseek-v4-flash`（需先 Cmd+Q 退出 Cursor）。
+
+### 5.2 调整思考强度（可选）
 
 默认 **`reasoning_effort: high`**（未使用 `max`）。`max` 思考内容过多，Agent 多轮会明显变慢。
 
@@ -168,7 +179,7 @@ bash deploy.sh
 
 在 Cursor 聊天窗口的左上角，点击模型名称下拉菜单：
 
-1. 找到并选择 **`deepseek-v4-pro`**
+1. 选择 **`deepseek-v4-pro`** 或 **`deepseek-v4-flash`**
 2. 将模式切换为 **Agent**（而不是 Chat）
 
 ### 7.3 测试一下

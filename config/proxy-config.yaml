@@ -2,6 +2,7 @@
 # API Key 由 Cursor 请求头 Authorization 转发，不在此文件保存。
 
 base_url: https://api.deepseek.com
+# 请求未带 model 时的回退；Cursor 一般会传 deepseek-v4-pro 或 deepseek-v4-flash
 model: deepseek-v4-pro
 thinking: enabled
 # 思考强度：low | medium | high | max

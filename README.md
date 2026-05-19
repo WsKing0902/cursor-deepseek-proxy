@@ -42,6 +42,7 @@ The reasoning_content in the thinking mode must be passed back to the API.
 | **自动同步 URL** | `url-sync` 服务 + 宿主机桥接，隧道变更时自动更新 Cursor |
 | **开箱即用** | `bash deploy.sh` / `bash redeploy.sh` 完成部署并打开 Cursor |
 | **思考强度** | 默认 `reasoning_effort: high`（见下方 [调整思考模式](#调整思考模式reasoning_effort)） |
+| **模型** | 支持 **`deepseek-v4-pro`** 与 **`deepseek-v4-flash`**（见 [模型选择](#模型选择-pro--flash)） |
 
 ---
 
@@ -69,7 +70,7 @@ cp config/env.example .env
 bash deploy.sh
 ```
 
-完成后在 Cursor 中选择模型 **`deepseek-v4-pro`**，切换到 **Agent** 模式即可。
+完成后在 Cursor 中选择 **`deepseek-v4-pro`** 或 **`deepseek-v4-flash`**，切换到 **Agent** 模式即可。
 
 > **使用 Clash / Surge？** 请将 Cloudflare 相关域名设为 **直连**，否则隧道会失败。见 [运维手册 · 代理放行](docs/OPERATIONS.md#三代理--防火墙放行重要)。
 
@@ -126,6 +127,46 @@ flowchart TB
 | `bash docker/bin/down.sh` | 停止所有服务 |
 | `bash docker/bin/logs.sh` | 查看容器日志 |
 | `python3 src/sync_cursor.py --launch` | 手动同步 URL 并打开 Cursor |
+| `bash switch-model.sh deepseek-v4-flash` | 切换默认模型并写入 Cursor |
+
+---
+
+## 模型选择（Pro / Flash）
+
+| 模型 | 适用场景 |
+|------|----------|
+| **`deepseek-v4-pro`** | 复杂推理、大型重构、多步 Agent（默认） |
+| **`deepseek-v4-flash`** | 日常编码、快问快答、更省 token、响应更快 |
+
+部署后 **两个模型都会出现在 Cursor 下拉列表**；代理按 Cursor 请求里的 `model` 字段转发，无需改 `proxy-config.yaml`。
+
+### 本机操作流程
+
+**首次或日常启动（推荐）**
+
+```bash
+# 1. 确保 Docker 已开
+# 2. 重新部署（隧道 URL + 同步 Cursor + 打开 Cursor）
+bash redeploy.sh
+# 3. 在 Cursor 左上角下拉直接选 pro 或 flash，模式选 Agent
+```
+
+**仅切换默认模型（不重装 Docker）**
+
+```bash
+# 方式 A：一键脚本（会改 .env 并写入 Cursor，需先 Cmd+Q 退出 Cursor）
+bash switch-model.sh deepseek-v4-flash
+
+# 方式 B：手动
+# 编辑 .env → DEEPSEEK_MODEL=deepseek-v4-flash
+# Cmd+Q 退出 Cursor
+python3 src/apply_config.py
+# 重新打开 Cursor
+```
+
+**仅在 Cursor 里临时切换（不改 .env）**
+
+聊天窗口左上角模型下拉 → 选 `deepseek-v4-pro` 或 `deepseek-v4-flash` 即可（需至少部署/同步过一次）。
 
 ---
 

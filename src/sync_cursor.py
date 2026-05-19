@@ -52,7 +52,10 @@ def quit_cursor() -> None:
 
 def launch_cursor() -> bool:
     if sys.platform != "darwin":
-        print("非 macOS：请手动打开 Cursor，选择 deepseek-v4-pro。", file=sys.stderr)
+        print(
+            "非 macOS：请手动打开 Cursor，选择 deepseek-v4-pro 或 deepseek-v4-flash。",
+            file=sys.stderr,
+        )
         return False
     r = subprocess.run(["open", "-a", "Cursor"], capture_output=True, text=True)
     if r.returncode != 0:
@@ -60,7 +63,7 @@ def launch_cursor() -> bool:
         return False
     time.sleep(1.5)
     print("✓ 已启动 Cursor")
-    print("  → 聊天窗口左上角选择 deepseek-v4-pro，切换到 Agent 模式")
+    print("  → 聊天窗口选择 deepseek-v4-pro / deepseek-v4-flash，切换到 Agent 模式")
     return True
 
 
@@ -194,7 +197,7 @@ def sync(*, wait: bool, check_only: bool, quit_app: bool, launch: bool) -> int:
     if launch:
         launch_cursor()
     elif not already_synced:
-        print("请打开 Cursor，选择 deepseek-v4-pro。")
+        print("请打开 Cursor，选择 deepseek-v4-pro 或 deepseek-v4-flash。")
     return 0
 
 

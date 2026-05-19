@@ -4,6 +4,7 @@
 # `model` is the fallback when a request has no model; Cursor's requested
 # DeepSeek model name is otherwise respected.
 base_url: https://api.deepseek.com
+# Fallback when request omits model; Cursor usually sends v4-pro or v4-flash
 model: deepseek-v4-pro
 thinking: enabled
 # 思考强度：low | medium | high | max（默认 high，见 README「调整思考模式」）
