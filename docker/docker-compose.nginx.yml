@@ -7,8 +7,8 @@ services:
   proxy:
     container_name: cursor-deepseek-proxy-nginx
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.m.daocloud.io/library/python:3.11-slim}
     entrypoint: ["/usr/bin/tini", "--", "/entrypoint-local.sh"]

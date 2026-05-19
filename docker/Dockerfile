@@ -21,7 +21,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir \
     "https://github.com/yxlao/deepseek-cursor-proxy/archive/refs/heads/main.zip"
 
-COPY entrypoint.sh entrypoint-local.sh /
+COPY docker/entrypoint.sh docker/entrypoint-local.sh /
 COPY src/model_gateway.py /app/src/model_gateway.py
 RUN chmod +x /entrypoint.sh /entrypoint-local.sh /app/src/model_gateway.py
 

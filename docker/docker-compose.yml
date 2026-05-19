@@ -4,8 +4,8 @@ services:
   proxy:
     container_name: cursor-deepseek-proxy
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         # 与 amazon-reviews-daas 等项目一致；本机若只有 python:3.11-slim 可改为该名
         PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.m.daocloud.io/library/python:3.11-slim}
