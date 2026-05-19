@@ -1,26 +1,45 @@
 #!/bin/sh
 set -eu
 PROXY_HOST="${PROXY_HOST:-0.0.0.0}"
-PROXY_PORT="${PROXY_PORT:-9000}"
+PROXY_INTERNAL_PORT="${PROXY_INTERNAL_PORT:-9001}"
+MODEL_GATEWAY_PORT="${MODEL_GATEWAY_PORT:-9000}"
 DATA_DIR="${DATA_DIR:-/data}"
 mkdir -p "$DATA_DIR"
-shutdown() { kill "$PROXY_PID" "$CF_PID" 2>/dev/null || true; }
+shutdown() {
+  kill "$PROXY_PID" "$GATEWAY_PID" "$CF_PID" 2>/dev/null || true
+}
 trap shutdown INT TERM
-echo "[entrypoint] starting proxy ${PROXY_HOST}:${PROXY_PORT}"
+
+echo "[entrypoint] starting proxy ${PROXY_HOST}:${PROXY_INTERNAL_PORT}"
 CONFIG_ARG=""
 if [ -f "${DATA_DIR}/config.yaml" ]; then
   CONFIG_ARG="--config ${DATA_DIR}/config.yaml"
 fi
-deepseek-cursor-proxy ${CONFIG_ARG} --no-ngrok --host "$PROXY_HOST" --port "$PROXY_PORT" >"${DATA_DIR}/proxy.log" 2>&1 &
+deepseek-cursor-proxy ${CONFIG_ARG} --no-ngrok --host "$PROXY_HOST" --port "$PROXY_INTERNAL_PORT" >"${DATA_DIR}/proxy.log" 2>&1 &
 PROXY_PID=$!
+
 i=0
 while [ "$i" -lt 30 ]; do
-  curl -sf "http://127.0.0.1:${PROXY_PORT}/v1/models" -H "Authorization: Bearer x" >/dev/null 2>&1 && break
+  curl -sf "http://127.0.0.1:${PROXY_INTERNAL_PORT}/v1/models" -H "Authorization: Bearer x" >/dev/null 2>&1 && break
   i=$((i+1)); sleep 1
 done
-curl -sf "http://127.0.0.1:${PROXY_PORT}/v1/models" -H "Authorization: Bearer x" >/dev/null || { tail -20 "${DATA_DIR}/proxy.log"; exit 1; }
+curl -sf "http://127.0.0.1:${PROXY_INTERNAL_PORT}/v1/models" -H "Authorization: Bearer x" >/dev/null \
+  || { tail -20 "${DATA_DIR}/proxy.log"; exit 1; }
+
+echo "[entrypoint] starting model gateway :${MODEL_GATEWAY_PORT} → :${PROXY_INTERNAL_PORT}"
+python3 /app/src/model_gateway.py >"${DATA_DIR}/gateway.log" 2>&1 &
+GATEWAY_PID=$!
+
+i=0
+while [ "$i" -lt 15 ]; do
+  curl -sf "http://127.0.0.1:${MODEL_GATEWAY_PORT}/v1/models" -H "Authorization: Bearer x" >/dev/null 2>&1 && break
+  i=$((i+1)); sleep 1
+done
+curl -sf "http://127.0.0.1:${MODEL_GATEWAY_PORT}/v1/models" -H "Authorization: Bearer x" >/dev/null \
+  || { tail -20 "${DATA_DIR}/gateway.log"; exit 1; }
+
 : >"${DATA_DIR}/cloudflared.log"
-/usr/local/bin/cloudflared tunnel --url "http://127.0.0.1:${PROXY_PORT}" >>"${DATA_DIR}/cloudflared.log" 2>&1 &
+/usr/local/bin/cloudflared tunnel --url "http://127.0.0.1:${MODEL_GATEWAY_PORT}" >>"${DATA_DIR}/cloudflared.log" 2>&1 &
 CF_PID=$!
 PUBLIC_URL=""
 i=0
@@ -35,5 +54,5 @@ printf '%s\n' "$PUBLIC_URL" > "${DATA_DIR}/public-url.txt"
 echo "=============================================="
 echo " Cursor Base URL: ${PUBLIC_URL}"
 echo "=============================================="
-tail -F "${DATA_DIR}/proxy.log" "${DATA_DIR}/cloudflared.log" &
+tail -F "${DATA_DIR}/proxy.log" "${DATA_DIR}/gateway.log" "${DATA_DIR}/cloudflared.log" &
 wait "$PROXY_PID"

@@ -90,6 +90,20 @@ def _display_name(model_id: str) -> str:
     return MODEL_DISPLAY_NAMES.get(model_id, model_id)
 
 
+def _model_variant(model_id: str, label: str) -> dict:
+    """与 Cursor 内置模型一致：下拉主要读 variants[].displayName。"""
+    return {
+        "parameterValues": [],
+        "displayName": label,
+        "isMaxMode": False,
+        "isDefaultMaxConfig": True,
+        "isDefaultNonMaxConfig": True,
+        "displayNameOutsidePicker": label,
+        "variantStringRepresentation": f"{model_id}[]",
+        "legacySlug": model_id,
+    }
+
+
 def _apply_display_names(entry: dict, model_id: str) -> None:
     """界面显示 DeepSeek 品牌名；name/serverModelName 保持 API id。"""
     label = _display_name(model_id)
@@ -98,6 +112,9 @@ def _apply_display_names(entry: dict, model_id: str) -> None:
     entry["clientDisplayName"] = label
     entry["inputboxShortModelName"] = label
     entry["displayNameOutsidePicker"] = label
+    entry["variants"] = [_model_variant(model_id, label)]
+    entry["vendorName"] = "deepseek"
+    entry["vendor"] = {"id": 0, "displayName": "DeepSeek"}
     entry["isUserAdded"] = True
 
 
@@ -158,6 +175,23 @@ def register_models(data: dict, ai_settings: dict, model_ids: tuple[str, ...]) -
     data["availableDefaultModels2"] = catalog
 
 
+def deepseek_labels_need_fix(data: dict) -> bool:
+    """Cursor 拉取 /v1/models 后常会清空 clientDisplayName，需补回。"""
+    expected = MODEL_DISPLAY_NAMES
+    for m in data.get("availableDefaultModels2") or []:
+        if not isinstance(m, dict):
+            continue
+        mid = m.get("name")
+        if mid not in expected:
+            continue
+        if m.get("clientDisplayName") != expected[mid]:
+            return True
+        variants = m.get("variants") or []
+        if not variants or variants[0].get("displayName") != expected[mid]:
+            return True
+    return False
+
+
 def patch_application_user(data: dict, base_url: str, model_id: str) -> dict:
     data["openAIBaseUrl"] = base_url.rstrip("/")
     data["useOpenAIKey"] = True
@@ -172,6 +206,11 @@ def main() -> int:
     import argparse
     p = argparse.ArgumentParser(description="将 .env 写入 Cursor BYOK 配置")
     p.add_argument("--env", help="指定 .env 文件路径", default=None)
+    p.add_argument(
+        "--labels-only",
+        action="store_true",
+        help="仅修复模型显示名（不改 Base URL / Key），Cursor 需已退出",
+    )
     args = p.parse_args()
 
     env_file = Path(args.env) if args.env else ENV_FILE
@@ -223,7 +262,7 @@ def main() -> int:
         return 1
 
     try:
-        os.chmod(ENV_FILE, 0o600)
+        os.chmod(env_file, 0o600)
     except OSError:
         pass
 
@@ -238,6 +277,20 @@ def main() -> int:
             return 1
 
         app_user = json.loads(row[0])
+        if args.labels_only:
+            if not deepseek_labels_need_fix(app_user):
+                print("模型显示名已是 DeepSeek，无需修复。")
+                return 0
+            ai = app_user.setdefault("aiSettings", {})
+            register_models(app_user, ai, SUPPORTED_MODELS)
+            print("已修复 Cursor 模型显示名（DeepSeek V4 Pro / Flash）。")
+            conn.execute(
+                "INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)",
+                (APP_USER_KEY, json.dumps(app_user, separators=(",", ":"))),
+            )
+            conn.commit()
+            return 0
+
         app_user = patch_application_user(app_user, base_url, model_id)
         conn.execute(
             "INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)",

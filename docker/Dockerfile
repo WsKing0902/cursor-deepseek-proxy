@@ -22,13 +22,17 @@ RUN pip install --no-cache-dir \
     "https://github.com/yxlao/deepseek-cursor-proxy/archive/refs/heads/main.zip"
 
 COPY entrypoint.sh entrypoint-local.sh /
-RUN chmod +x /entrypoint.sh /entrypoint-local.sh
+COPY src/model_gateway.py /app/src/model_gateway.py
+RUN chmod +x /entrypoint.sh /entrypoint-local.sh /app/src/model_gateway.py
 
 ENV PROXY_HOST=0.0.0.0
-ENV PROXY_PORT=9000
+ENV PROXY_INTERNAL_PORT=9001
+ENV MODEL_GATEWAY_PORT=9000
+ENV MODEL_GATEWAY_UPSTREAM=http://127.0.0.1:9001
 ENV DATA_DIR=/data
 
 EXPOSE 9000
+# 9000 = model_gateway（对外）；9001 = deepseek-cursor-proxy（容器内）
 VOLUME ["/data"]
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]

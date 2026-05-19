@@ -128,6 +128,7 @@ flowchart TB
 | `bash docker/bin/logs.sh` | 查看容器日志 |
 | `python3 src/sync_cursor.py --launch` | 手动同步 URL 并打开 Cursor |
 | `bash switch-model.sh deepseek-v4-flash` | 切换默认模型并写入 Cursor |
+| `bash fix-labels.sh` | Cursor 退出后修复显示名（小写 → DeepSeek） |
 
 ---
 

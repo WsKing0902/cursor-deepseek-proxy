@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -21,6 +22,8 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 import sync_cursor as sc  # noqa: E402
+
+APPLY_PY = sc.APPLY_PY
 
 NEED_SYNC_FILE = Path(
     os.environ.get("NEED_SYNC_FILE", str(sc.PROJECT_ROOT / "docker/data/need-sync"))
@@ -83,6 +86,18 @@ def container_daemon(interval: int) -> int:
         time.sleep(interval)
 
 
+def maybe_fix_model_labels() -> None:
+    """Cursor 运行时会从 /v1/models 刷新并把小写 id 写回；退出后补 DeepSeek 显示名。"""
+    if sc.cursor_running():
+        return
+    subprocess.run(
+        [sys.executable, str(APPLY_PY), "--labels-only"],
+        cwd=str(sc.PROJECT_ROOT),
+        capture_output=True,
+        text=True,
+    )
+
+
 def host_bridge(interval: int, launch: bool) -> int:
     if sys.platform != "darwin":
         print("host-bridge 仅用于 macOS 宿主机", file=sys.stderr)
@@ -109,6 +124,8 @@ def host_bridge(interval: int, launch: bool) -> int:
                     print("[url-sync] 同步完成", flush=True)
                 else:
                     print(f"[url-sync] 同步失败 (exit {rc})，稍后重试", flush=True)
+            else:
+                maybe_fix_model_labels()
         except Exception as e:
             print(f"[url-sync] 错误: {e}", flush=True)
         time.sleep(interval)

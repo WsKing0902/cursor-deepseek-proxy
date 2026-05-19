@@ -74,6 +74,20 @@ bash switch-model.sh deepseek-v4-flash
 
 ---
 
+## 模型名变回小写 deepseek
+
+**原因：** Cursor 启动时会请求 `/v1/models` 并刷新列表，可能把小写 id 写回界面。
+
+**处理：**
+
+1. **Cmd+Q** 退出 Cursor  
+2. `bash fix-labels.sh` 或 `python3 src/apply_config.py --labels-only`  
+3. 重新打开 Cursor  
+
+重建容器后网关会自动返回 **DeepSeek V4 Pro / Flash** 显示名：`bash redeploy.sh`
+
+---
+
 ## 完全清理后重来（少见）
 
 ```bash
