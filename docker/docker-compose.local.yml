@@ -1,0 +1,22 @@
+# 本地直连模式：只映射 9000，不跑 cloudflared
+name: cursor-deepseek-local
+
+services:
+  proxy:
+    container_name: cursor-deepseek-proxy-local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.m.daocloud.io/library/python:3.11-slim}
+    entrypoint: ["/usr/bin/tini", "--", "/entrypoint-local.sh"]
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./data:/data
+      - ../config/proxy-config.yaml:/data/config.yaml:ro
+    environment:
+      PROXY_HOST: "0.0.0.0"
+      PROXY_PORT: "9000"
+    restart: "no"
+    init: true

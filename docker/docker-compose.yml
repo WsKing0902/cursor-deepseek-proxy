@@ -1,0 +1,41 @@
+name: cursor-deepseek
+
+services:
+  proxy:
+    container_name: cursor-deepseek-proxy
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # 与 amazon-reviews-daas 等项目一致；本机若只有 python:3.11-slim 可改为该名
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.m.daocloud.io/library/python:3.11-slim}
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./data:/data
+      - ../config/proxy-config.yaml:/data/config.yaml:ro
+    environment:
+      PROXY_HOST: "0.0.0.0"
+      PROXY_PORT: "9000"
+    restart: "no"
+    init: true
+
+  # 自动监视隧道 URL；不一致时更新 .env 并通知宿主机写入 Cursor
+  url-sync:
+    container_name: cursor-deepseek-url-sync
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.watcher
+    depends_on:
+      proxy:
+        condition: service_started
+    volumes:
+      - ./data:/data
+      - ..:/project:ro
+    environment:
+      PROJECT_ROOT: /project
+      URL_FILE: /data/public-url.txt
+      NEED_SYNC_FILE: /data/need-sync
+      WATCH_INTERVAL: "5"
+      IN_DOCKER: "1"
+    restart: unless-stopped

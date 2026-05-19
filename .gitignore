@@ -1,0 +1,53 @@
+# Docker 运行时数据
+docker/data/
+!docker/data/.gitkeep
+docker/data/*.log
+docker/data/need-sync
+docker/data/url-watcher-host.pid
+docker/nginx/certs/
+
+# 本地 env（模板在 config/env.example）
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# 虚拟环境
+venv/
+.venv/
+
+# 日志
+*.log
+logs/
+
+# SQLite 缓存
+*.sqlite3
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Docker
+*.tar
+
+# 证书
+*.pem
+*.key
+*.crt
+
+# 临时文件
+/tmp/
+temp/

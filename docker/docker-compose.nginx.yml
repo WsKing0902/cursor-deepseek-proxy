@@ -1,0 +1,51 @@
+# nginx HTTPS 反代 → deepseek-cursor-proxy（无 cloudflared）
+# 说明：仅把 HTTP 升级成 HTTPS，不能单独绕过 Cursor 的 SSRF；127.0.0.1 通常仍会被拒。
+# 可尝试本机局域网 IP：https://192.168.x.x:8443/v1
+name: cursor-deepseek-nginx
+
+services:
+  proxy:
+    container_name: cursor-deepseek-proxy-nginx
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.m.daocloud.io/library/python:3.11-slim}
+    entrypoint: ["/usr/bin/tini", "--", "/entrypoint-local.sh"]
+    expose:
+      - "9000"
+    volumes:
+      - ./data:/data
+      - ../config/proxy-config.yaml:/data/config.yaml:ro
+    environment:
+      PROXY_HOST: "0.0.0.0"
+      PROXY_PORT: "9000"
+    restart: "no"
+    init: true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-sf",
+          "http://127.0.0.1:9000/v1/models",
+          "-H",
+          "Authorization: Bearer x",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+
+  nginx:
+    image: ${NGINX_IMAGE:-docker.m.daocloud.io/library/nginx:alpine}
+    container_name: cursor-deepseek-nginx
+    depends_on:
+      proxy:
+        condition: service_healthy
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    restart: "no"

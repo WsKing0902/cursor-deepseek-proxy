@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+WORKDIR /project
+ENV PYTHONUNBUFFERED=1
+ENV IN_DOCKER=1
+ENV PROJECT_ROOT=/project
+ENV URL_FILE=/data/public-url.txt
+ENV NEED_SYNC_FILE=/data/need-sync
+ENV WATCH_INTERVAL=5
+
+COPY src/url_watcher.py src/sync_cursor.py src/apply_config.py /project/src/
+
+CMD ["python3", "/project/src/url_watcher.py", "--daemon", "--interval", "5"]
