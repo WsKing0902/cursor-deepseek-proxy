@@ -11,6 +11,18 @@ Use **DeepSeek V4** in **Agent mode** inside **Cursor** reliably—automatic `re
 
 ---
 
+## Screenshots
+
+**Cursor Agent mode** — `deepseek-v4-pro` with multi-turn chat and Thinking working:
+
+![Cursor Agent mode with deepseek-v4-pro](docs/images/cursor-agent-demo.png)
+
+**Proxy logs** — `effort=high`, reasoning cache hits for stable multi-turn Agent:
+
+![Proxy request log with effort=high](docs/images/proxy-log-demo.png)
+
+---
+
 ## Why this project?
 
 After configuring DeepSeek BYOK in Cursor, **single-turn Chat** often works, but **multi-turn Agent** may fail with:

@@ -11,6 +11,18 @@
 
 ---
 
+## 效果展示
+
+**Cursor Agent 模式** — 选择 `deepseek-v4-pro`，多轮对话与 Thinking 正常：
+
+![Cursor Agent 模式使用 deepseek-v4-pro](docs/images/cursor-agent-demo.png)
+
+**代理日志** — `effort=high`，`reasoning_content` 缓存命中（多轮 Agent 可稳定运行）：
+
+![代理请求日志 effort=high](docs/images/proxy-log-demo.png)
+
+---
+
 ## 为什么需要这个项目？
 
 在 Cursor 中配置 DeepSeek BYOK 后，**Chat 单轮**往往正常，但 **Agent 多轮**容易报错：
