@@ -135,8 +135,8 @@ flowchart TB
 
 | 模型 | 适用场景 |
 |------|----------|
-| **`deepseek-v4-pro`** | 复杂推理、大型重构、多步 Agent（默认） |
-| **`deepseek-v4-flash`** | 日常编码、快问快答、更省 token、响应更快 |
+| **`deepseek-v4-pro`**（显示 **DeepSeek V4 Pro**） | 复杂推理、大型重构、多步 Agent（默认） |
+| **`deepseek-v4-flash`**（显示 **DeepSeek V4 Flash**） | 日常编码、快问快答、更省 token、响应更快 |
 
 部署后 **两个模型都会出现在 Cursor 下拉列表**；代理按 Cursor 请求里的 `model` 字段转发，无需改 `proxy-config.yaml`。
 
@@ -234,6 +234,7 @@ cursor-deepseek-v4/
 | [运维手册](docs/OPERATIONS.md) · [EN](docs/en/OPERATIONS.md) | 命令表、Clash 规则、故障排查 |
 | [安全说明](docs/SECURITY.md) · [EN](docs/en/SECURITY.md) | 风险边界与加固建议 |
 | [文档索引](docs/README.md) · [EN](docs/en/README.md) | 全部文档导航 |
+| [失效与重启](docs/RECOVERY.md) · [EN](docs/en/RECOVERY.md) | 隧道过期、连不上、缺 Flash 时怎么处理 |
 | [发布清单](docs/PUBLISHING.md) | 推送到 GitHub 前检查（中文） |
 
 **仓库**：https://github.com/WsKing0902/cursor-deepseek-proxy
@@ -249,15 +250,25 @@ cursor-deepseek-v4/
 
 ---
 
-## 故障排查速查
+## 失效与重启（速查）
+
+**优先执行：**
+
+```bash
+bash redeploy.sh
+```
+
+（需先 Cmd+Q 退出 Cursor；会自动重建隧道、同步 URL、注册 **pro + flash** 并打开 Cursor。）
 
 | 现象 | 处理 |
 |------|------|
-| Cloudflare 1033 / Tunnel error | 隧道 URL 过期 → `bash redeploy.sh` |
-| `Network Error` | Cursor Base URL 与隧道不一致 → `python3 src/sync_cursor.py --launch` |
-| `reasoning_content` 报错 | 确认未直连 `api.deepseek.com`，应走隧道 URL |
+| 隧道失效 / 1033 / Network Error | `bash redeploy.sh` |
+| 看不到 **deepseek-v4-flash** | Cmd+Q → `python3 src/apply_config.py` 或 `bash redeploy.sh` |
+| `reasoning_content` 报错 | `bash redeploy.sh`（勿直连官方 API） |
 | 隧道连不上 | Clash 将 `*.trycloudflare.com` 设为 DIRECT |
-| API 401 | 检查 Key 与余额 |
+| API 401 | 检查 Key 与余额后 `bash redeploy.sh` |
+
+完整分步说明见 **[失效与重启指南](docs/RECOVERY.md)** · [EN](docs/en/RECOVERY.md)。
 
 ---
 

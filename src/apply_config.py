@@ -37,6 +37,12 @@ AGENT_MODES = (
 SUPPORTED_MODELS = ("deepseek-v4-pro", "deepseek-v4-flash")
 DEFAULT_MODEL = "deepseek-v4-pro"
 
+# API model id → Cursor 界面显示名（与 GPT/Claude 等品牌大小写一致）
+MODEL_DISPLAY_NAMES: dict[str, str] = {
+    "deepseek-v4-pro": "DeepSeek V4 Pro",
+    "deepseek-v4-flash": "DeepSeek V4 Flash",
+}
+
 
 def load_env(path: Path) -> dict[str, str]:
     env: dict[str, str] = {}
@@ -80,7 +86,51 @@ def set_default_model(ai_settings: dict, model_id: str) -> None:
     ai_settings["backgroundComposerModel"] = model_id
 
 
-def register_models(ai_settings: dict, model_ids: tuple[str, ...]) -> None:
+def _display_name(model_id: str) -> str:
+    return MODEL_DISPLAY_NAMES.get(model_id, model_id)
+
+
+def _apply_display_names(entry: dict, model_id: str) -> None:
+    """界面显示 DeepSeek 品牌名；name/serverModelName 保持 API id。"""
+    label = _display_name(model_id)
+    entry["name"] = model_id
+    entry["serverModelName"] = model_id
+    entry["clientDisplayName"] = label
+    entry["inputboxShortModelName"] = label
+    entry["displayNameOutsidePicker"] = label
+    entry["isUserAdded"] = True
+
+
+def _model_catalog_entry(model_id: str, template: dict | None = None) -> dict:
+    """Cursor 模型下拉读取 availableDefaultModels2，仅写 userAddedModels 不会出现 Flash。"""
+    if template:
+        entry = dict(template)
+        # 避免从模板带入旧 displayName / variants
+        entry.pop("variants", None)
+        entry["variants"] = []
+    else:
+        entry = {
+            "defaultOn": False,
+            "parameterDefinitions": [],
+            "variants": [],
+            "legacySlugs": [],
+            "idAliases": [],
+            "supportsAgent": True,
+            "degradationStatus": 0,
+            "supportsThinking": True,
+            "supportsImages": True,
+            "supportsMaxMode": True,
+            "supportsNonMaxMode": True,
+            "isRecommendedForBackgroundComposer": False,
+            "supportsPlanMode": True,
+            "supportsSandboxing": True,
+            "namedModelSectionIndex": 1,
+        }
+    _apply_display_names(entry, model_id)
+    return entry
+
+
+def register_models(data: dict, ai_settings: dict, model_ids: tuple[str, ...]) -> None:
     user_models = list(ai_settings.get("userAddedModels") or [])
     for mid in model_ids:
         if mid not in user_models:
@@ -93,13 +143,27 @@ def register_models(ai_settings: dict, model_ids: tuple[str, ...]) -> None:
             enabled.append(mid)
     ai_settings["modelOverrideEnabled"] = enabled
 
+    catalog = list(data.get("availableDefaultModels2") or [])
+    by_name = {
+        m.get("name"): m
+        for m in catalog
+        if isinstance(m, dict) and m.get("name")
+    }
+    template = by_name.get("deepseek-v4-pro") or by_name.get(model_ids[0])
+    for mid in model_ids:
+        if mid in by_name:
+            _apply_display_names(by_name[mid], mid)
+            continue
+        catalog.append(_model_catalog_entry(mid, template if isinstance(template, dict) else None))
+    data["availableDefaultModels2"] = catalog
+
 
 def patch_application_user(data: dict, base_url: str, model_id: str) -> dict:
     data["openAIBaseUrl"] = base_url.rstrip("/")
     data["useOpenAIKey"] = True
 
     ai_settings = data.setdefault("aiSettings", {})
-    register_models(ai_settings, SUPPORTED_MODELS)
+    register_models(data, ai_settings, SUPPORTED_MODELS)
     set_default_model(ai_settings, model_id)
     return data
 
@@ -193,8 +257,9 @@ def main() -> int:
     print(f"  API Key  : {api_key[:8]}...{api_key[-4:]}")
     print()
     others = [m for m in SUPPORTED_MODELS if m != model_id]
-    print(f"请重新打开 Cursor → 默认模型: {model_id}")
-    print(f"  也可在聊天窗口切换: {model_id} / {', '.join(others)}")
+    labels = [_display_name(m) for m in SUPPORTED_MODELS]
+    print(f"请重新打开 Cursor → 默认: {_display_name(model_id)}")
+    print(f"  模型下拉应可见: {', '.join(labels)}")
     return 0
 
 

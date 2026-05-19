@@ -103,7 +103,7 @@ export no_proxy="$NO_PROXY"
 | 仅 Cursor 临时切换 | 聊天窗口模型下拉，无需改 `.env` |
 | 日常启动 | `bash redeploy.sh` → 下拉选 pro 或 flash |
 
-`apply_config.py` 会同时注册 `deepseek-v4-pro` 与 `deepseek-v4-flash`。
+`apply_config.py` 会写入 `userAddedModels` 与 **`availableDefaultModels2`**（Cursor 下拉读后者，缺了会看不到 Flash）。
 
 ### 4.3 代理思考模式 `config/proxy-config.yaml`
 
@@ -170,7 +170,19 @@ curl -s "${CURSOR_BASE_URL%/}/chat/completions" \
 
 ---
 
-## 六、故障排查
+## 六、失效与重启
+
+隧道过期、Network Error、模型列表缺少 Flash 时，**优先**：
+
+```bash
+bash redeploy.sh
+```
+
+分步说明与完全清理流程见 **[RECOVERY.md](./RECOVERY.md)**。
+
+---
+
+## 七、故障排查
 
 | 现象 | 可能原因 | 处理 |
 |------|----------|------|
@@ -192,7 +204,7 @@ tail -f docker/data/proxy.log docker/data/cloudflared.log
 
 ---
 
-## 七、隧道 URL 自动同步（已内置）
+## 八、隧道 URL 自动同步（已内置）
 
 `docker-compose` 包含 **url-sync** 服务，每 5 秒检查 `docker/data/public-url.txt`：
 
@@ -220,7 +232,7 @@ docker logs -f cursor-deepseek-url-sync
 
 ---
 
-## 八、模式切换（高级）
+## 九、模式切换（高级）
 
 | 场景 | 命令 |
 |------|------|
@@ -231,7 +243,7 @@ docker logs -f cursor-deepseek-url-sync
 
 ---
 
-## 九、停止与清理
+## 十、停止与清理
 
 ```bash
 bash docker/bin/down.sh
@@ -246,8 +258,9 @@ rm -f docker/data/*.sqlite3 docker/data/proxy.log
 
 ---
 
-## 十、相关文档
+## 十一、相关文档
 
 - [QUICK_START.md](./QUICK_START.md) — 从零安装
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — 原理与自建穿透
 - [SECURITY.md](./SECURITY.md) — 风险与加固
+- [RECOVERY.md](./RECOVERY.md) — 失效与重启

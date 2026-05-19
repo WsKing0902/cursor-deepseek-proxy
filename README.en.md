@@ -133,8 +133,8 @@ flowchart TB
 
 | Model | Best for |
 |-------|----------|
-| **`deepseek-v4-pro`** | Complex reasoning, large refactors, multi-step Agent (default) |
-| **`deepseek-v4-flash`** | Daily coding, quick Q&A, lower cost, faster |
+| **`deepseek-v4-pro`** (shown as **DeepSeek V4 Pro**) | Complex reasoning, large refactors, multi-step Agent (default) |
+| **`deepseek-v4-flash`** (shown as **DeepSeek V4 Flash**) | Daily coding, quick Q&A, lower cost, faster |
 
 Both appear in Cursor’s model dropdown after deploy. The proxy forwards whatever `model` Cursor sends.
 
@@ -227,15 +227,25 @@ For long-term use, consider [Named Tunnel + Access](docs/en/ARCHITECTURE.md#6-sa
 
 ---
 
-## Troubleshooting
+## Recovery & restart
+
+**Try first:**
+
+```bash
+bash redeploy.sh
+```
+
+(Cmd+Q Cursor first; rebuilds tunnel, syncs URL, registers **pro + flash**, opens Cursor.)
 
 | Symptom | Fix |
 |---------|-----|
-| Cloudflare 1033 / Tunnel error | URL expired → `bash redeploy.sh` |
-| `Network Error` | Cursor Base URL stale → `python3 src/sync_cursor.py --launch` |
-| `reasoning_content` error | Do not point Cursor at `api.deepseek.com`—use tunnel URL |
+| Tunnel expired / 1033 / Network Error | `bash redeploy.sh` |
+| **deepseek-v4-flash** missing | Cmd+Q → `python3 src/apply_config.py` or `bash redeploy.sh` |
+| `reasoning_content` error | `bash redeploy.sh` |
 | Tunnel unreachable | Clash: `*.trycloudflare.com` → DIRECT |
-| API 401 | Check key and balance |
+| API 401 | Fix key/balance → `bash redeploy.sh` |
+
+Full guide: **[RECOVERY.md](docs/en/RECOVERY.md)** · [中文](docs/RECOVERY.md).
 
 ---
 

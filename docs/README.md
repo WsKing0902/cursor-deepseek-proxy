@@ -12,6 +12,7 @@
 | 2 | [OPERATIONS.md](./OPERATIONS.md) | 日常运维、Clash 放行、命令速查 |
 | 3 | [ARCHITECTURE.md](./ARCHITECTURE.md) | 理解原理、反代风险、自建穿透 |
 | 4 | [SECURITY.md](./SECURITY.md) | 安全边界与加固清单 |
+| — | [RECOVERY.md](./RECOVERY.md) | **失效与重启**（隧道过期、缺 Flash） |
 | — | [HOW_IT_WORKS.md](./HOW_IT_WORKS.md) | 已合并至 ARCHITECTURE，保留跳转 |
 | — | [PUBLISHING.md](./PUBLISHING.md) | 推送到 GitHub 前的检查清单 |
 
@@ -23,6 +24,7 @@
 | 2 | [en/OPERATIONS.md](./en/OPERATIONS.md) | Daily ops & troubleshooting |
 | 3 | [en/ARCHITECTURE.md](./en/ARCHITECTURE.md) | Design & self-hosted tunnels |
 | 4 | [en/SECURITY.md](./en/SECURITY.md) | Security & hardening |
+| — | [en/RECOVERY.md](./en/RECOVERY.md) | **Recovery & restart** |
 
 ## 方案速览
 

@@ -129,8 +129,8 @@ DEEPSEEK_API_KEY=sk-your-key-here
 
 | 模型 | 说明 |
 |------|------|
-| `deepseek-v4-pro` | 默认，复杂 Agent 任务 |
-| `deepseek-v4-flash` | 更快、更省 token |
+| `deepseek-v4-pro`（**DeepSeek V4 Pro**） | 默认，复杂 Agent 任务 |
+| `deepseek-v4-flash`（**DeepSeek V4 Flash**） | 更快、更省 token |
 
 切换默认模型：`bash switch-model.sh deepseek-v4-flash`（需先 Cmd+Q 退出 Cursor）。
 
