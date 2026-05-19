@@ -1,5 +1,7 @@
 # 运维与操作手册
 
+> **Languages / 语言:** [中文](OPERATIONS.md) · [English](en/OPERATIONS.md)
+
 日常部署、代理放行、故障排查的实操说明。
 
 ---
@@ -95,17 +97,41 @@ export no_proxy="$NO_PROXY"
 
 ### 4.2 代理思考模式 `config/proxy-config.yaml`
 
+控制 DeepSeek V4 在思考模式下的推理深度，对应字段 **`reasoning_effort`**。
+
+| 值 | 说明 |
+|----|------|
+| `low` | 最少思考，最快 |
+| `medium` | 较轻思考 |
+| **`high`** | **项目默认**：质量与速度平衡，适合日常 Agent |
+| `max` | 最强推理，**`reasoning_content` 体积大、响应慢、耗 token 多** |
+
+**为何默认 `high` 而非 `max`：** `max` 在 Cursor Agent 多轮里会累积大量思考内容，代理需缓存并回传 `reasoning_content`，用户侧等待与展示成本都偏高；多数编码任务用 `high` 已够用。
+
+**修改步骤：**
+
+1. 编辑 `config/proxy-config.yaml`：
+
 ```yaml
-reasoning_effort: high   # 已改为 high（非 max）
+reasoning_effort: high   # 改为 low | medium | high | max
+display_reasoning: true  # 是否在响应中返回思考过程（可选）
+collasible_reasoning: true
 ```
 
-修改后需 **重建容器**：
+2. 重建容器使挂载配置生效：
 
 ```bash
-bash docker/bin/redeploy.sh
+bash redeploy.sh
+# 或：bash docker/bin/redeploy.sh
 ```
 
-本机 Python 模式会复制到 `~/.deepseek-cursor-proxy/config.yaml`。
+本机 Python 模式会复制到 `~/.deepseek-cursor-proxy/config.yaml`，改源文件后同样需重启代理进程。
+
+#### 清理 reasoning 缓存（可选）
+
+从高档位降到 `low`/`medium` 后若仍偏慢，可删除 `docker/data/` 下的 reasoning SQLite 后重部署，见 [九、停止与清理](#九停止与清理)。
+
+详见 [README · 调整思考模式](../README.md#调整思考模式reasoning_effort)。
 
 ---
 

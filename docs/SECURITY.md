@@ -1,5 +1,7 @@
 # 安全说明
 
+> **Languages / 语言:** [中文](SECURITY.md) · [English](en/SECURITY.md)
+
 本文说明使用「本地代理 + 公网反代」时的风险边界与加固建议。架构背景见 [ARCHITECTURE.md](./ARCHITECTURE.md)。
 
 ---

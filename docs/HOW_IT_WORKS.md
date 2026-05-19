@@ -1,5 +1,7 @@
 # 原理说明（已迁移）
 
+> **Languages / 语言:** [中文](HOW_IT_WORKS.md) · [English](en/ARCHITECTURE.md)
+
 本文档已合并并扩展为 **[ARCHITECTURE.md](./ARCHITECTURE.md)**，内容包括：
 
 - Cursor 与 DeepSeek `reasoning_content` 机制

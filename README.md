@@ -1,5 +1,8 @@
 # Cursor × DeepSeek V4
 
+> **Languages / 语言:** [简体中文](README.md) · [English](README.en.md)  
+> **Docs / 文档:** [中文](docs/README.md) · [English](docs/en/README.md)
+
 在 **Cursor** 里稳定使用 **DeepSeek V4** 的 **Agent 模式**——自动处理 `reasoning_content`，一键部署，隧道 URL 变化时自动同步 Cursor 配置。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -26,7 +29,7 @@ The reasoning_content in the thinking mode must be passed back to the API.
 | **Cloudflare 隧道** | 将本地 `:9000` 暴露为 `https://*.trycloudflare.com/v1` |
 | **自动同步 URL** | `url-sync` 服务 + 宿主机桥接，隧道变更时自动更新 Cursor |
 | **开箱即用** | `bash deploy.sh` / `bash redeploy.sh` 完成部署并打开 Cursor |
-| **思考强度** | 默认 `reasoning_effort: high`（平衡质量与速度） |
+| **思考强度** | 默认 `reasoning_effort: high`（见下方 [调整思考模式](#调整思考模式reasoning_effort)） |
 
 ---
 
@@ -114,6 +117,39 @@ flowchart TB
 
 ---
 
+## 调整思考模式（reasoning_effort）
+
+本项目默认使用 **`high`**，而不是 `max`。
+
+| 档位 | 特点 |
+|------|------|
+| `low` / `medium` | 思考更少，响应更快，适合简单任务 |
+| **`high`（默认）** | 质量与速度较均衡，适合日常 Agent 开发 |
+| `max` | 推理链最长、输出最多，**明显更慢**，且 token 消耗更高 |
+
+维护者选用 `high` 的原因：`max` 会产生大量 `reasoning_content`，在 Cursor Agent 多轮对话中传输与展示开销都很大，整体体验偏慢；`high` 在多数编码场景下已足够。
+
+### 如何修改
+
+1. 编辑 **`config/proxy-config.yaml`**，修改 `reasoning_effort` 一行，例如：
+
+```yaml
+reasoning_effort: medium   # 可选：low | medium | high | max
+```
+
+2. **重建代理容器**（仅改文件不会生效，因配置在容器启动时挂载）：
+
+```bash
+bash redeploy.sh
+# 或仅重建代理：bash docker/bin/redeploy.sh
+```
+
+3. 可选：配合 `display_reasoning` / `collasible_reasoning` 控制 Cursor 里是否展示思考过程（同一文件内）。
+
+> 若从 `max` 改为 `low`/`medium` 后仍感觉偏慢，可删除 `docker/data/*.sqlite3` 后重部署，见 [运维手册 · 停止与清理](docs/OPERATIONS.md#九停止与清理)。
+
+---
+
 ## 项目结构
 
 ```
@@ -140,12 +176,12 @@ cursor-deepseek-v4/
 
 | 文档 | 内容 |
 |------|------|
-| [从零开始教程](docs/QUICK_START.md) | 10 分钟上手，适合第一次使用 |
-| [架构与原理](docs/ARCHITECTURE.md) | 技术细节、反代风险、自建穿透方案 |
-| [运维手册](docs/OPERATIONS.md) | 命令表、Clash 规则、故障排查 |
-| [安全说明](docs/SECURITY.md) | 风险边界与加固建议 |
-| [文档索引](docs/README.md) | 全部文档导航 |
-| [发布清单](docs/PUBLISHING.md) | 推送到 GitHub 前检查 |
+| [从零开始教程](docs/QUICK_START.md) · [EN](docs/en/QUICK_START.md) | 10 分钟上手 |
+| [架构与原理](docs/ARCHITECTURE.md) · [EN](docs/en/ARCHITECTURE.md) | 技术细节、反代风险、自建穿透 |
+| [运维手册](docs/OPERATIONS.md) · [EN](docs/en/OPERATIONS.md) | 命令表、Clash 规则、故障排查 |
+| [安全说明](docs/SECURITY.md) · [EN](docs/en/SECURITY.md) | 风险边界与加固建议 |
+| [文档索引](docs/README.md) · [EN](docs/en/README.md) | 全部文档导航 |
+| [发布清单](docs/PUBLISHING.md) | 推送到 GitHub 前检查（中文） |
 
 **仓库**：https://github.com/WsKing0902/cursor-deepseek-proxy
 

@@ -4,6 +4,8 @@
 base_url: https://api.deepseek.com
 model: deepseek-v4-pro
 thinking: enabled
+# 思考强度：low | medium | high | max
+# 默认 high：max 推理内容过多、Agent 多轮明显变慢；改后需 bash redeploy.sh
 reasoning_effort: high
 display_reasoning: true
 collasible_reasoning: true

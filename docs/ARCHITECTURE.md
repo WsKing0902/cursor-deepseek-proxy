@@ -1,5 +1,7 @@
 # 架构与原理
 
+> **Languages / 语言:** [中文](ARCHITECTURE.md) · [English](en/ARCHITECTURE.md)
+
 > 快速上手请看 [QUICK_START.md](./QUICK_START.md)。运维与代理放行见 [OPERATIONS.md](./OPERATIONS.md)。安全风险见 [SECURITY.md](./SECURITY.md)。
 
 ---
@@ -56,7 +58,7 @@ Cursor 第2轮 → 请求里没有 reasoning_content → DeepSeek 400
 
 ```yaml
 thinking: enabled
-reasoning_effort: high   # 非 max，平衡质量与速度/成本
+reasoning_effort: high   # 默认非 max：max 推理链过长导致 Agent 多轮偏慢，见 README
 ```
 
 Docker 通过卷挂载到容器内 `/data/config.yaml`，由 `entrypoint.sh` 以 `--config` 传入。

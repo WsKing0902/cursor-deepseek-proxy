@@ -6,6 +6,7 @@
 base_url: https://api.deepseek.com
 model: deepseek-v4-pro
 thinking: enabled
+# 思考强度：low | medium | high | max（默认 high，见 README「调整思考模式」）
 reasoning_effort: high
 display_reasoning: true
 collasible_reasoning: true

@@ -1,5 +1,7 @@
 # 从零开始：在 Cursor 中使用 DeepSeek V4
 
+> **Languages / 语言:** [中文](QUICK_START.md) · [English](en/QUICK_START.md)
+
 本教程假设你从零开始，一步步引导你完成所有配置。全程大约需要 **10 分钟**。
 
 ---
@@ -120,6 +122,12 @@ DEEPSEEK_API_KEY=sk-your-key-here
 把 `sk-your-key-here` 替换成你在第 2 步获取的真实 Key。改完后按 `Ctrl+O` 保存，`Ctrl+X` 退出。
 
 其他配置项不用改，`CURSOR_BASE_URL` 留空即可——脚本会自动填写。
+
+### 5.1 调整思考强度（可选）
+
+默认 **`reasoning_effort: high`**（未使用 `max`）。`max` 思考内容过多，Agent 多轮会明显变慢。
+
+若要修改，编辑 `config/proxy-config.yaml` 中的 `reasoning_effort`（可选 `low` / `medium` / `high` / `max`），保存后执行 `bash redeploy.sh`。详见 [README · 调整思考模式](../README.md#调整思考模式reasoning_effort)。
 
 ---
 

@@ -1,5 +1,7 @@
 # 发布到 GitHub 检查清单
 
+> **Languages / 语言:** [中文](PUBLISHING.md) · English docs: [en/README.md](en/README.md)
+
 推送前请确认：
 
 ## 安全
