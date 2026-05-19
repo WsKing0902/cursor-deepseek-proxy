@@ -3,27 +3,21 @@
 > **Languages / 语言:** [简体中文](README.md) · [English](README.en.md)  
 > **Docs / 文档:** [中文](docs/README.md) · [English](docs/en/README.md)
 
-Use **DeepSeek V4** in **Agent mode** inside **Cursor** reliably—automatic `reasoning_content` handling, one-command deploy, and auto-sync when the tunnel URL changes.
+Use **DeepSeek V4** in **Agent mode** inside **Cursor**—**Pro / Flash** model switching, automatic `reasoning_content` handling, one-command deploy.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey)]()
 [![Docker](https://img.shields.io/badge/Docker-Required-2496ED)]()
 
----
+### DeepSeek V4 Pro · Agent mode
 
-## Screenshots
+![DeepSeek V4 Pro in Cursor Agent](docs/images/cursor-deepseek-v4-pro.png)
 
-**DeepSeek V4 Pro** — Agent mode with `deepseek-v4-pro`; the model identifies itself as Pro:
+### DeepSeek V4 Flash · Agent mode
 
-![Cursor Agent with DeepSeek V4 Pro](docs/images/cursor-deepseek-v4-pro.png)
+![DeepSeek V4 Flash in Cursor Agent](docs/images/cursor-deepseek-v4-flash.png)
 
-**DeepSeek V4 Flash** — switch to `deepseek-v4-flash` for faster, lower-cost responses:
-
-![Cursor Agent with DeepSeek V4 Flash](docs/images/cursor-deepseek-v4-flash.png)
-
-**Proxy logs** — `effort=high`; after switching models, `request model=` changes accordingly:
-
-![Proxy request log with effort=high](docs/images/proxy-log-demo.png)
+> Switch between `deepseek-v4-pro` and `deepseek-v4-flash` in the dropdown; `request model=` in proxy logs updates accordingly.
 
 ---
 
@@ -264,6 +258,14 @@ bash redeploy.sh
 | API 401 | Fix key/balance → `bash redeploy.sh` |
 
 Full guide: **[RECOVERY.md](docs/en/RECOVERY.md)** · [中文](docs/RECOVERY.md).
+
+---
+
+## More screenshots
+
+**Proxy logs** (`effort=high`; `request model=` changes when you switch models):
+
+![Proxy request log](docs/images/proxy-log-demo.png)
 
 ---
 

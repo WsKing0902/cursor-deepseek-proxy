@@ -3,27 +3,21 @@
 > **Languages / 语言:** [简体中文](README.md) · [English](README.en.md)  
 > **Docs / 文档:** [中文](docs/README.md) · [English](docs/en/README.md)
 
-在 **Cursor** 里稳定使用 **DeepSeek V4** 的 **Agent 模式**——自动处理 `reasoning_content`，一键部署，隧道 URL 变化时自动同步 Cursor 配置。
+在 **Cursor** 里稳定使用 **DeepSeek V4** 的 **Agent 模式**——支持 **Pro / Flash** 双模型切换，自动处理 `reasoning_content`，一键部署。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey)]()
 [![Docker](https://img.shields.io/badge/Docker-Required-2496ED)]()
 
----
+### DeepSeek V4 Pro · Agent 模式
 
-## 效果展示
+![DeepSeek V4 Pro 在 Cursor Agent 中运行](docs/images/cursor-deepseek-v4-pro.png)
 
-**DeepSeek V4 Pro** — Agent 模式下切换 `deepseek-v4-pro`，模型会正确识别为 Pro 版本：
+### DeepSeek V4 Flash · Agent 模式
 
-![Cursor Agent 使用 DeepSeek V4 Pro](docs/images/cursor-deepseek-v4-pro.png)
+![DeepSeek V4 Flash 在 Cursor Agent 中运行](docs/images/cursor-deepseek-v4-flash.png)
 
-**DeepSeek V4 Flash** — 同一配置下可切换 `deepseek-v4-flash`，更快、更省 token：
-
-![Cursor Agent 使用 DeepSeek V4 Flash](docs/images/cursor-deepseek-v4-flash.png)
-
-**代理日志** — `effort=high`；切换模型后 `request model=` 会对应变化（见 [如何确认真的切换了](#如何确认模型已切换)）：
-
-![代理请求日志 effort=high](docs/images/proxy-log-demo.png)
+> 下拉可在 `deepseek-v4-pro` 与 `deepseek-v4-flash` 间切换；代理日志中 `request model=` 会随选择变化（见 [如何确认模型已切换](#如何确认模型已切换)）。
 
 ---
 
@@ -288,6 +282,14 @@ bash redeploy.sh
 | API 401 | 检查 Key 与余额后 `bash redeploy.sh` |
 
 完整分步说明见 **[失效与重启指南](docs/RECOVERY.md)** · [EN](docs/en/RECOVERY.md)。
+
+---
+
+## 更多截图
+
+**代理日志**（`effort=high`，切换模型后 `request model=` 会变化）：
+
+![代理请求日志](docs/images/proxy-log-demo.png)
 
 ---
 
