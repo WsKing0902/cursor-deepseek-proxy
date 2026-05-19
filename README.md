@@ -13,11 +13,15 @@
 
 ## 效果展示
 
-**Cursor Agent 模式** — 选择 `deepseek-v4-pro`，多轮对话与 Thinking 正常：
+**DeepSeek V4 Pro** — Agent 模式下切换 `deepseek-v4-pro`，模型会正确识别为 Pro 版本：
 
-![Cursor Agent 模式使用 deepseek-v4-pro](docs/images/cursor-agent-demo.png)
+![Cursor Agent 使用 DeepSeek V4 Pro](docs/images/cursor-deepseek-v4-pro.png)
 
-**代理日志** — `effort=high`，`reasoning_content` 缓存命中（多轮 Agent 可稳定运行）：
+**DeepSeek V4 Flash** — 同一配置下可切换 `deepseek-v4-flash`，更快、更省 token：
+
+![Cursor Agent 使用 DeepSeek V4 Flash](docs/images/cursor-deepseek-v4-flash.png)
+
+**代理日志** — `effort=high`；切换模型后 `request model=` 会对应变化（见 [如何确认真的切换了](#如何确认模型已切换)）：
 
 ![代理请求日志 effort=high](docs/images/proxy-log-demo.png)
 
@@ -113,7 +117,7 @@ flowchart TB
 | 运行 | `proxy` | 代理 + cloudflared，写出公网 URL |
 | 监视 | `url-sync` | 每 5s 检测 URL 是否变化 |
 | 同步 | 宿主机桥接 | 将最新 URL 写入 Cursor 数据库 |
-| 使用 | Cursor BYOK | Base URL 指向隧道，模型 `deepseek-v4-pro` |
+| 使用 | Cursor BYOK | Base URL 指向隧道，模型 `deepseek-v4-pro` / `deepseek-v4-flash` |
 
 ---
 
@@ -169,6 +173,19 @@ python3 src/apply_config.py
 
 聊天窗口左上角模型下拉 → 选 `deepseek-v4-pro` 或 `deepseek-v4-flash` 即可（需至少部署/同步过一次）。
 
+### 如何确认模型已切换
+
+```bash
+tail -f docker/data/proxy.log
+```
+
+在 Cursor 里分别用 Pro / Flash 各发一条消息，日志中应出现：
+
+```text
+request model=deepseek-v4-pro ...
+request model=deepseek-v4-flash ...
+```
+
 ---
 
 ## 调整思考模式（reasoning_effort）
@@ -211,9 +228,10 @@ cursor-deepseek-v4/
 ├── deploy.sh / redeploy.sh / verify.sh   # 根目录快捷入口
 ├── scripts/                            # 部署与诊断脚本
 ├── src/
-│   ├── apply_config.py                 # 写入 Cursor SQLite 配置
-│   ├── sync_cursor.py                    # 同步隧道 URL
-│   └── url_watcher.py                    # URL 自动监视
+│   ├── apply_config.py                 # 写入 Cursor（Pro + Flash + 显示名）
+│   ├── model_gateway.py                # 改写 /v1/models 返回 DeepSeek 品牌名
+│   ├── sync_cursor.py                  # 同步隧道 URL
+│   └── url_watcher.py                  # URL 自动监视
 ├── config/
 │   ├── env.example                     # 环境变量模板
 │   └── proxy-config.yaml               # 代理配置（reasoning_effort: high）

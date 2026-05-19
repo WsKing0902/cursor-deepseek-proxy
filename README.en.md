@@ -13,11 +13,15 @@ Use **DeepSeek V4** in **Agent mode** inside **Cursor** reliably—automatic `re
 
 ## Screenshots
 
-**Cursor Agent mode** — `deepseek-v4-pro` with multi-turn chat and Thinking working:
+**DeepSeek V4 Pro** — Agent mode with `deepseek-v4-pro`; the model identifies itself as Pro:
 
-![Cursor Agent mode with deepseek-v4-pro](docs/images/cursor-agent-demo.png)
+![Cursor Agent with DeepSeek V4 Pro](docs/images/cursor-deepseek-v4-pro.png)
 
-**Proxy logs** — `effort=high`, reasoning cache hits for stable multi-turn Agent:
+**DeepSeek V4 Flash** — switch to `deepseek-v4-flash` for faster, lower-cost responses:
+
+![Cursor Agent with DeepSeek V4 Flash](docs/images/cursor-deepseek-v4-flash.png)
+
+**Proxy logs** — `effort=high`; after switching models, `request model=` changes accordingly:
 
 ![Proxy request log with effort=high](docs/images/proxy-log-demo.png)
 
@@ -126,6 +130,7 @@ flowchart TB
 | `bash docker/bin/logs.sh` | Container logs |
 | `python3 src/sync_cursor.py --launch` | Manual URL sync and open Cursor |
 | `bash switch-model.sh deepseek-v4-flash` | Change default model and write Cursor |
+| `bash fix-labels.sh` | Fix display names after Cursor quit (lowercase → DeepSeek) |
 
 ---
 
@@ -155,6 +160,19 @@ bash switch-model.sh deepseek-v4-flash   # Cmd+Q Cursor first
 ```
 
 **Temporary switch in Cursor** — use the model dropdown; no `.env` change needed.
+
+### Verify the switch
+
+```bash
+tail -f docker/data/proxy.log
+```
+
+Send one message with Pro, then Flash. You should see:
+
+```text
+request model=deepseek-v4-pro ...
+request model=deepseek-v4-flash ...
+```
 
 ---
 
