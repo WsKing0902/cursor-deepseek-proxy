@@ -10,12 +10,17 @@ When the tunnel URL changes, Cursor cannot connect, or **deepseek-v4-flash** is 
 
 ```bash
 cd cursor-deepseek-proxy
-bash redeploy.sh
+bash sync-now.sh     # 1033 / stale URL: sync immediately
+bash redeploy.sh     # full rebuild
 ```
 
-Stops old containers → rebuilds proxy + url-sync → waits for new tunnel → **writes Cursor config (pro + flash)** → launches Cursor.
-
-> If prompted that Cursor is running: **Cmd+Q** quit fully, then run `bash redeploy.sh` again.
+> **After reboot:** the container cannot write `.env` (read-only mount). The **macOS host bridge** must run. If you see `Read-only file system: '/project/.env'`:
+>
+> ```bash
+> bash ensure-sync.sh
+> bash install-host-sync.sh   # optional: auto-start on login
+> bash sync-now.sh
+> ```
 
 ---
 

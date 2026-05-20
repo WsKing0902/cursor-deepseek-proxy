@@ -33,6 +33,7 @@ fi
 echo ">>> 构建并启动容器（proxy + url-sync 自动监视）..."
 docker compose "${COMPOSE_ARGS[@]}" up -d --build
 
+bash "${PROJECT_ROOT}/scripts/ensure-host-sync.sh"
 bash "${DIR}/bin/start-url-watcher.sh"
 
 echo ">>> 等待隧道就绪，同步 Cursor 配置并启动 Cursor..."

@@ -10,12 +10,22 @@
 
 ```bash
 cd cursor-deepseek-proxy   # 你的项目目录
+bash sync-now.sh          # 1033 / URL 过期：立即同步
+# 或完整重建：
 bash redeploy.sh
 ```
 
 会自动：停止旧容器 → 重建 proxy + url-sync → 等待新隧道 → **写入 Cursor（含 pro + flash）** → 打开 Cursor。
 
-> 若提示 Cursor 仍在运行：先 **Cmd+Q** 完全退出，再执行一次 `bash redeploy.sh`。
+> **重启电脑后**：Docker 里的 `url-sync` **不能**写 `.env`（只读挂载），必须由 **macOS 宿主机桥接** 更新。若日志出现 `Read-only file system: '/project/.env'`，请执行：
+>
+> ```bash
+> bash ensure-sync.sh          # 启动宿主机桥接
+> bash install-host-sync.sh    # 可选：开机自动启动桥接
+> bash sync-now.sh             # 立即同步 URL 到 Cursor
+> ```
+
+> 若提示 Cursor 仍在运行：先 **Cmd+Q** 完全退出，再执行一次。
 
 ---
 

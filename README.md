@@ -127,6 +127,9 @@ flowchart TB
 | `python3 src/sync_cursor.py --launch` | 手动同步 URL 并打开 Cursor |
 | `bash switch-model.sh deepseek-v4-flash` | 切换默认模型并写入 Cursor |
 | `bash fix-labels.sh` | Cursor 退出后修复显示名（小写 → DeepSeek） |
+| `bash sync-now.sh` | **立即同步**隧道 URL（1033 / 重启后） |
+| `bash ensure-sync.sh` | 启动宿主机 URL 桥接（重启电脑后必做） |
+| `bash install-host-sync.sh` | 安装开机自动 URL 同步（macOS） |
 
 ---
 
@@ -265,13 +268,20 @@ cursor-deepseek-v4/
 
 ## 失效与重启（速查）
 
-**优先执行：**
+**隧道 1033 / 重启电脑后 URL 未更新：**
+
+```bash
+bash ensure-sync.sh    # 启动宿主机桥接（容器不能写 .env）
+bash sync-now.sh       # 立即同步并打开 Cursor
+```
+
+**完整重建：**
 
 ```bash
 bash redeploy.sh
 ```
 
-（需先 Cmd+Q 退出 Cursor；会自动重建隧道、同步 URL、注册 **pro + flash** 并打开 Cursor。）
+（需先 Cmd+Q 退出 Cursor。建议执行一次 `bash install-host-sync.sh` 避免下次重启后再现 1033。）
 
 | 现象 | 处理 |
 |------|------|

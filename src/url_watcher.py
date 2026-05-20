@@ -29,6 +29,7 @@ NEED_SYNC_FILE = Path(
     os.environ.get("NEED_SYNC_FILE", str(sc.PROJECT_ROOT / "docker/data/need-sync"))
 )
 DEFAULT_INTERVAL = int(os.environ.get("WATCH_INTERVAL", "5"))
+IN_DOCKER = os.environ.get("IN_DOCKER", "").strip() in ("1", "true", "yes")
 
 
 def normalize(url: str | None) -> str | None:
@@ -51,7 +52,10 @@ def current_tunnel_url() -> str | None:
 
 
 def is_out_of_sync(url: str) -> bool:
+    """容器内只能读 .env，不能读宿主机 Cursor DB；写 .env 由宿主机桥接完成。"""
     env_u = normalize(sc.env_base_url())
+    if IN_DOCKER:
+        return url != env_u
     db_u = normalize(sc.db_base_url())
     return url != env_u or url != db_u
 
@@ -77,8 +81,10 @@ def container_daemon(interval: int) -> int:
                 print(f"[url-sync] 隧道 URL: {url}", flush=True)
                 last = url
             if url and is_out_of_sync(url):
-                print("[url-sync] 检测到不一致，更新 .env 并请求宿主机同步…", flush=True)
-                sc.update_env(url)
+                print(
+                    "[url-sync] 检测到不一致，已写入 need-sync（由 macOS 宿主机桥接更新 .env 与 Cursor）…",
+                    flush=True,
+                )
                 sc.URL_FILE.write_text(url + "\n", encoding="utf-8")
                 mark_need_sync(url)
         except Exception as e:
@@ -110,7 +116,8 @@ def host_bridge(interval: int, launch: bool) -> int:
                 url = normalize(NEED_SYNC_FILE.read_text(encoding="utf-8"))
             if not url:
                 url = current_tunnel_url()
-            if url and is_out_of_sync(url):
+            pending = NEED_SYNC_FILE.is_file()
+            if url and (pending or is_out_of_sync(url)):
                 print(f"[url-sync] 同步 Cursor → {url}", flush=True)
                 os.environ["CURSOR_BASE_URL"] = url
                 rc = sc.sync(

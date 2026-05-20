@@ -125,6 +125,9 @@ flowchart TB
 | `python3 src/sync_cursor.py --launch` | Manual URL sync and open Cursor |
 | `bash switch-model.sh deepseek-v4-flash` | Change default model and write Cursor |
 | `bash fix-labels.sh` | Fix display names after Cursor quit (lowercase → DeepSeek) |
+| `bash sync-now.sh` | **Sync tunnel URL now** (1033 / after reboot) |
+| `bash ensure-sync.sh` | Start macOS host URL bridge (required after reboot) |
+| `bash install-host-sync.sh` | Install login-item auto sync (macOS) |
 
 ---
 
