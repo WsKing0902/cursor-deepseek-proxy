@@ -81,12 +81,16 @@ def container_daemon(interval: int) -> int:
                 print(f"[url-sync] 隧道 URL: {url}", flush=True)
                 last = url
             if url and is_out_of_sync(url):
-                print(
-                    "[url-sync] 检测到不一致，已写入 need-sync（由 macOS 宿主机桥接更新 .env 与 Cursor）…",
-                    flush=True,
-                )
+                print("[url-sync] 检测到 URL 不一致，正在更新…", flush=True)
                 sc.URL_FILE.write_text(url + "\n", encoding="utf-8")
+                try:
+                    sc.update_env(url)
+                    print("[url-sync] 已更新 .env", flush=True)
+                except OSError as e:
+                    print(f"[url-sync] 无法写 .env: {e}，已标记 need-sync", flush=True)
                 mark_need_sync(url)
+                if not IN_DOCKER:
+                    print("[url-sync] 提示: Cursor 配置需 macOS 宿主机桥接写入", flush=True)
         except Exception as e:
             print(f"[url-sync] 错误: {e}", flush=True)
         time.sleep(interval)

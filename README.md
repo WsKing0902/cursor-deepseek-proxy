@@ -19,6 +19,18 @@
 
 > 下拉可在 `deepseek-v4-pro` 与 `deepseek-v4-flash` 间切换；代理日志中 `request model=` 会随选择变化（见 [如何确认模型已切换](#如何确认模型已切换)）。
 
+### 重启后还要跑脚本吗？
+
+| 层级 | 重启后是否自动 | 说明 |
+|------|----------------|------|
+| **Docker proxy + 隧道** | ✅ 是（`restart: unless-stopped`） | 需打开 Docker Desktop |
+| **容器更新 `.env` 里的 URL** | ✅ 是 | `url-sync` 可写 `.env` |
+| **写入 Cursor 数据库** | ⚠️ 需 macOS 宿主机桥接 | Linux 容器**无法**改 `~/Library/.../state.vscdb` |
+
+**首次 `bash deploy.sh` 会自动安装「开机 URL 同步」**（`install-host-sync.sh`，仅 macOS 一次）。之后重启电脑只要：**开 Docker** → 容器起来 → 登录项自动把新 URL 写入 Cursor。
+
+若仍 Network Error / 1033：`bash sync-now.sh`（等同手动补救）。
+
 ---
 
 ## 为什么需要这个项目？

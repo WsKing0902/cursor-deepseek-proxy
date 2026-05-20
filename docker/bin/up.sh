@@ -33,7 +33,18 @@ fi
 echo ">>> 构建并启动容器（proxy + url-sync 自动监视）..."
 docker compose "${COMPOSE_ARGS[@]}" up -d --build
 
-bash "${PROJECT_ROOT}/scripts/ensure-host-sync.sh"
+# macOS：自动安装登录项，重启电脑后也会同步 Cursor（纯 Docker 无法写 Cursor 数据库）
+if [[ "$(uname)" == "Darwin" ]]; then
+  PLIST="${HOME}/Library/LaunchAgents/com.cursor-deepseek.url-sync.plist"
+  if [[ ! -f "$PLIST" ]]; then
+    echo ">>> 首次部署：安装开机自动 URL 同步（仅需一次）…"
+    bash "${PROJECT_ROOT}/scripts/install-host-sync.sh" || true
+  else
+    bash "${PROJECT_ROOT}/scripts/ensure-host-sync.sh"
+  fi
+else
+  bash "${PROJECT_ROOT}/scripts/ensure-host-sync.sh" 2>/dev/null || true
+fi
 bash "${DIR}/bin/start-url-watcher.sh"
 
 echo ">>> 等待隧道就绪，同步 Cursor 配置并启动 Cursor..."

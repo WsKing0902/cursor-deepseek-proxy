@@ -44,6 +44,23 @@ MODEL_DISPLAY_NAMES: dict[str, str] = {
 }
 
 
+def read_cursor_api_key() -> str:
+    if not CURSOR_DB.is_file():
+        return ""
+    try:
+        conn = sqlite3.connect(CURSOR_DB)
+        row = conn.execute(
+            "SELECT value FROM ItemTable WHERE key = ?",
+            (OPENAI_KEY_STORAGE,),
+        ).fetchone()
+        conn.close()
+        if row and row[0] and not str(row[0]).startswith("sk-your"):
+            return str(row[0]).strip()
+    except sqlite3.Error:
+        pass
+    return ""
+
+
 def load_env(path: Path) -> dict[str, str]:
     env: dict[str, str] = {}
     if not path.is_file():
@@ -241,6 +258,10 @@ def main() -> int:
             file=sys.stderr,
         )
 
+    if not api_key or api_key.startswith("sk-your"):
+        api_key = read_cursor_api_key()
+        if api_key:
+            print("已从 Cursor 数据库恢复 DEEPSEEK_API_KEY 到本次写入。", file=sys.stderr)
     if not api_key or api_key.startswith("sk-your"):
         print("请先在 .env 中填写有效的 DEEPSEEK_API_KEY，然后重新运行。", file=sys.stderr)
         return 1

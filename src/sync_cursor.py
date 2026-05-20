@@ -121,24 +121,65 @@ def wait_for_url(timeout: int = 90) -> str:
     sys.exit(f"超时：未在 {URL_FILE} 或容器日志中找到隧道 URL")
 
 
+def _read_cursor_api_key() -> str:
+    if not DB.is_file():
+        return ""
+    try:
+        conn = sqlite3.connect(DB)
+        row = conn.execute(
+            "SELECT value FROM ItemTable WHERE key = ?",
+            ("cursorAuth/openAIKey",),
+        ).fetchone()
+        conn.close()
+        if row and row[0] and not str(row[0]).startswith("sk-your"):
+            return str(row[0]).strip()
+    except sqlite3.Error:
+        pass
+    return ""
+
+
 def update_env(url: str) -> None:
-    lines = (
-        ENV_FILE.read_text(encoding="utf-8").replace("\r\n", "\n").splitlines()
-        if ENV_FILE.is_file()
-        else []
+    example = PROJECT_ROOT / "config" / "env.example"
+    base_env: dict[str, str] = {}
+    if example.is_file():
+        for raw in example.read_text(encoding="utf-8").splitlines():
+            line = raw.strip().replace("\r", "")
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            base_env[k.strip()] = v.strip()
+    if ENV_FILE.is_file():
+        for raw in ENV_FILE.read_text(encoding="utf-8").splitlines():
+            line = raw.strip().replace("\r", "")
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            base_env[k.strip()] = v.strip().strip('"').strip("'")
+    base_env["CURSOR_BASE_URL"] = url
+    if not base_env.get("DEEPSEEK_API_KEY") or base_env["DEEPSEEK_API_KEY"].startswith("sk-your"):
+        recovered = _read_cursor_api_key()
+        if recovered:
+            base_env["DEEPSEEK_API_KEY"] = recovered
+    order = (
+        "DEEPSEEK_API_KEY",
+        "DEEPSEEK_BASE_URL",
+        "DEEPSEEK_MODEL",
+        "CURSOR_BASE_URL",
     )
-    out: list[str] = []
-    found = False
-    for line in lines:
-        if line.startswith("CURSOR_BASE_URL="):
-            out.append(f"CURSOR_BASE_URL={url}")
-            found = True
-        else:
-            out.append(line)
-    if not found:
-        out.append(f"CURSOR_BASE_URL={url}")
+    lines: list[str] = [
+        "# Cursor × DeepSeek V4 — 由 sync 自动维护，请勿删除 DEEPSEEK_API_KEY",
+        "",
+    ]
+    seen: set[str] = set()
+    for key in order:
+        if key in base_env and base_env[key]:
+            lines.append(f"{key}={base_env[key]}")
+            seen.add(key)
+    for key, val in base_env.items():
+        if key not in seen and val:
+            lines.append(f"{key}={val}")
     ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
-    ENV_FILE.write_text("\n".join(out) + "\n", encoding="utf-8")
+    ENV_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
     try:
         os.chmod(ENV_FILE, 0o600)
     except OSError:

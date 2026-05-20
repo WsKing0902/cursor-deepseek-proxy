@@ -17,7 +17,7 @@ services:
     environment:
       PROXY_HOST: "0.0.0.0"
       PROXY_PORT: "9000"
-    restart: "no"
+    restart: unless-stopped
     init: true
 
   # 自动监视隧道 URL；不一致时更新 .env 并通知宿主机写入 Cursor
@@ -26,14 +26,19 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.watcher
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-docker.m.daocloud.io/library/python:3.11-slim}
     depends_on:
       proxy:
         condition: service_started
     volumes:
       - ./data:/data
       - ..:/project:ro
+      # 单独挂载可写 .env（项目目录只读）；Cursor 数据库只能由 macOS 宿主机桥接写入
+      - ../.env:/project/.env:rw
     environment:
       PROJECT_ROOT: /project
+      ENV_FILE: /project/.env
       URL_FILE: /data/public-url.txt
       NEED_SYNC_FILE: /data/need-sync
       WATCH_INTERVAL: "5"
