@@ -70,6 +70,12 @@ bash deploy.sh
 
 保存后 **重新加载配置**。若 cloudflared 日志出现 `198.18.x.x` 且 QUIC 超时，多半是 fake-ip / 代理劫持，务必直连。
 
+**若日志为 `198.41.x.x` + `Failed to dial a quic connection` / `timeout: no recent network activity`：**
+
+- cloudflared 走 **UDP（约 7844 端口）** 连 Cloudflare，被 Clash TUN/防火墙拦截时，隧道公网 URL 会失效（`.env` 里虽有 URL，外网访问仍 1033）。
+- 处理：Clash 中对 `198.41.0.0/16`、`198.42.0.0/16` 设 **DIRECT**，或临时关闭 TUN/系统代理后 `bash redeploy.sh`。
+- 验证隧道是否真通：`curl -s "$(grep CURSOR_BASE_URL .env | cut -d= -f2)/models" -H "Authorization: Bearer $DEEPSEEK_API_KEY"` 应返回 `200`。
+
 ### 3.3 macOS 防火墙
 
 - 允许 **Docker Desktop**、**cloudflared**（容器内）出站
